@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/5be79cb2c2.js" crossorigin="anonymous"></script>
+<!-- if it doesn't work use https://chrome.google.com/webstore/detail/moesif-origin-cors-change/digfbfaphojjndkpccljibejjbppifbc-->
+    <title>CRUD application using vue php and mysqli</title>
+</head>
+
+<body>
+    <div id="app">
+
+        <div class="container-fluid">
+            <div class="row bg-dark">
+                <div class="col-lg-12">
+                    <p class="text-center text-light display-4 pt-2" style="font-size: 25px;">CRUD application using vue
+                        php and mysqli <a href="index.html">admin</a></p>
+                </div> <!-- col-lg-12 -->
+            </div> <!-- row bg-dark-->
+        </div> <!-- container-fluid-->
+
+        <div class="container">
+            <div class="row mt-3">
+
+                <div class="col-lg-6">
+                    <h3 class="text-info"> Registered reservering</h3>
+                </div>
+                <div class="col-lg-6">
+                    <button class="btn btn-info float-right" @click="showAddModal=true">
+                        <i class="fas fa-user"></i>&nbsp;&nbsp;Add new reservering
+                    </button>
+                </div>
+
+            </div> <!-- row-->
+            <hr class="bg-info">
+            <div class="alert alert-danger" v-if="errorMsg">{{errorMsg}}</div>
+            <div class="alert alert-success" v-if="successMsg">{{successMsg}}</div>
+
+            <!-- Records-->
+            <div class="row">
+                <div class="col-lg-12">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr class="text-center bg-info text-light">
+                                <th>ID</th>
+                                <th>Code</th>
+                                <th>Naam</th>
+                                <th>Gerechtsoort_ID</th>
+                                <th>Edit</th>
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="text-center" v-for="menuitem in menuitems">
+                                <td>{{menuitem.ID}}</td>
+                                <td>{{menuitem.Code}}</td>
+                                <td>{{menuitem.Naam}}</td>
+                                <td>{{menuitem.Gerechtsoort_ID}}</td>
+                                <td><a href="#" class="text-success"
+                                        @click="showEditModal=true; selectMenuitems(menuitem);"><i
+                                            class="fas fa-edit"></i></a></td>
+                                <td><a href="#" class="text-danger"
+                                        @click="showDeleteModal=true; selectMenuitems(menuitem);"><i
+                                            class="fas fa-trash-alt"></i></a></td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div><!-- another row-->
+        </div>
+        <!--container -->
+
+        <!-- add New user model-->
+        <div id="overlay" v-if="showAddModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"> Add new Menu Item</h5>
+                        <button type="button" class="close" @click="showAddModal=false">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div> <!-- modal-header-->
+                    <div class="modal-body pt-4">
+                        <form action="#" method="POST">
+                            <div class="form-group">
+                                <input type="text" name="Code" class="form-control form-control-lg" placeholder="Code"
+                                    v-model="newMenuitem.Code">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="Naam" class="form-control form-control-lg" placeholder="Naam"
+                                    v-model="newMenuitem.Naam">
+                            </div>
+                            <div class="form-group">
+                                <input type="number" name="Gerechtsoort_ID" class="form-control form-control-lg" placeholder="number"
+                                    v-model="newMenuitem.Gerechtsoort_ID">
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-info btn-block btn-lg"
+                                    @click="showAddModal=false; addProduct(); clearMsg();">Add Menu Item</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!--modal-content -->
+            </div> <!-- modal-dialog-->
+        </div> <!-- overlay-->
+
+        <!-- Edit user model-->
+        <div id="overlay" v-if="showEditModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"> edit User</h5>
+                        <button type="button" class="close" @click="showEditModal=false">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div> <!-- modal-header-->
+                    <div class="modal-body pt-4">
+                        <form action="#" method="POST">
+                            <div class="form-group">
+                                <input type="text" name="Code" class="form-control form-control-lg" 
+                                    v-model="currentMenuitem.Code">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="Naam" class="form-control form-control-lg" 
+                                    v-model="currentMenuitem.Naam">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="Gerechtsoort_ID" class="form-control form-control-lg" 
+                                    v-model="currentMenuitem.Gerechtsoort_ID">
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-info btn-block btn-lg"
+                                    @click="showEditModal=false; updateProduct(); clearMsg();">Update user</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!--modal-content -->
+            </div> <!-- modal-dialog-->
+        </div> <!-- overlay-->
+
+        <!-- Delete user model-->
+        <div id="overlay" v-if="showDeleteModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"> delete User</h5>
+                        <button type="button" class="close" @click="showDeleteModal=false">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div> <!-- modal-header-->
+                    <div class="modal-body pt-4">
+                        <h4 class="text-danger">weet je het zeker</h4>
+                        <h5>you are deleting {{currentMenuitem.ID}} </h5>
+                        <hr>
+                        <button class="btn btn-danger btn-lg"
+                            @click="showDeleteModal=false;  deleteProduct(); clearMsg();">Zekers</button>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <button class="btn btn-success btn-lg" @click="showDeleteModal=false">Nou nee</button>
+                    </div>
+                </div>
+                <!--modal-content -->
+            </div> <!-- modal-dialog-->
+        </div> <!-- overlay-->
+
+    </div> <!-- ID app-->
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.13/dist/vue.js"></script>
+    <script type="text/javascript" src="dranken.js"></script>
+</body>
+
+</html>
